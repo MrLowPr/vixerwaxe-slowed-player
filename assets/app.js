@@ -448,7 +448,14 @@
     el.speedOut.textContent = p.speed.toFixed(2) + '×';
     el.reverbOut.textContent = Math.round(p.reverb * 100) + '%';
     el.bassOut.textContent = (p.bass > 0 ? '+' : '') + p.bass + ' dB';
-    if (!state.gradual) { state.rampFrom = null; }
+    if (state.gradual) {
+      // start (or restart) the drift from the current rate towards the target
+      state.rampFrom = Math.min(1.0, Math.max(audio.playbackRate || 1.0, state.speed));
+      state.rampStart = audio.currentTime;
+      state.rampTo = state.speed;
+    } else {
+      state.rampFrom = null;
+    }
     applyRate(); applyMix();
   }
 
