@@ -502,6 +502,7 @@
     });
     audio.addEventListener('loadedmetadata', () => {
       el.tDur.textContent = fmtTime(audio.duration);
+      applyRate();
     });
     audio.addEventListener('ended', () => {
       if (state.looping) return;
@@ -549,6 +550,7 @@
     setPitchMode();
     audio.volume = el.vol.value / 100;
     audio.src = TRACKS[0].local;
+    applyRate();
     el.npTitle.textContent = `${TRACKS[0].title} ${TRACKS[0].alt}`;
     el.npArtist.textContent = `@vixerwaxe — org by ${TRACKS[0].orig}`;
     el.speedOut.textContent = state.speed.toFixed(2) + '×';
