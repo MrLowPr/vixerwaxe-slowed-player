@@ -211,7 +211,23 @@
   function applyRate() {
     const rate = state.gradual && state.rampFrom !== null ? currentRampRate() : state.speed;
     audio.playbackRate = rate;
-    el.speedOut.textContent = rate.toFixed(2) + '×';
+    showRate(rate);
+  }
+
+  // Chrome resets playbackRate to defaultPlaybackRate while the media resource is
+  // loading, so the wanted rate is re-asserted every frame (only when it drifted).
+  let lastShownRate = null;
+  function showRate(rate) {
+    const txt = rate.toFixed(2) + '×';
+    if (txt !== lastShownRate) { el.speedOut.textContent = txt; lastShownRate = txt; }
+  }
+
+  function enforceRate() {
+    const rate = state.gradual && state.rampFrom !== null ? currentRampRate() : state.speed;
+    if (Math.abs(audio.playbackRate - rate) > 0.005) {
+      try { audio.playbackRate = rate; } catch (_) { /* not ready yet */ }
+    }
+    showRate(rate);
   }
 
   function currentRampRate() {
@@ -284,7 +300,8 @@
     }
     if (!data) data = new Uint8Array(128).fill(6);
 
-    if (!audio.paused && state.gradual) applyRate();
+    // keep the wanted playback rate pinned (Chrome resets it while loading)
+    enforceRate();
 
     drawBars(ctx, bw, bh, data, '#ff2f4d', 'rgba(37,244,238,0.55)');
 
